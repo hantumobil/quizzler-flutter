@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'question.dart';
+import 'quiz_brain.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
@@ -28,53 +31,37 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
 
-  List<Question> questionBank = [
-    Question(q: 'You can lead a cow down stairs but not up stairs.', a: false),
-    Question(
-        q: 'Approximately one quarter of human bones are in the feet.',
-        a: true),
-    Question(q: 'You can lead a cow down stairs but not up stairs.', a: true),
-  ];
-
-  int questionNumber = 0;
-
-  bool checkAnswer(answer) {
-    bool correctAnswer = questionBank[questionNumber].answer;
-
-    if (answer == correctAnswer) {
-      return true;
-    } else {
-      return false;
-    }
+  bool checkAnswer(bool answer) {
+    return answer == quizBrain.getQuestionAnswer();
   }
 
   void handleBtnClick(answer) {
-    bool answerIs = checkAnswer(answer);
-    if (answerIs == true) {
-      scoreKeeper.add(
-        Icon(
-          Icons.check_circle_outline,
-          color: Colors.green,
-        ),
-      );
-    } else {
-      scoreKeeper.add(
-        Icon(
-          Icons.remove_circle_outline,
-          color: Colors.red,
-        ),
-      );
+    // check quiz is running
+    if (!quizBrain.quizRunning()) {
+      print('quiz is end');
+      return;
     }
-    if (questionNumber == questionBank.length - 1) {
-      setState(() {
-        questionNumber = 0;
-        scoreKeeper = [];
-      });
-    } else {
-      setState(() {
-        questionNumber++;
-      });
-    }
+
+    setState(() {
+      // update UI
+      if (checkAnswer(answer)) {
+        scoreKeeper.add(
+          Icon(
+            Icons.check_circle_outline,
+            color: Colors.green,
+          ),
+        );
+      } else {
+        scoreKeeper.add(
+          Icon(
+            Icons.remove_circle_outline,
+            color: Colors.red,
+          ),
+        );
+      }
+      // proceed next question
+      quizBrain.nextQuestion();
+    });
   }
 
   @override
@@ -89,7 +76,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questionBank[questionNumber].text,
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -115,7 +102,6 @@ class _QuizPageState extends State<QuizPage> {
               onPressed: () {
                 //The user picked true.
                 handleBtnClick(true);
-                print('The user picked true.');
               },
             ),
           ),
