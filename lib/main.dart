@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'score.dart';
 import 'quiz_brain.dart';
 
 QuizBrain quizBrain = QuizBrain();
+Score score = Score(quizBrain.getQuestionLength());
 
 void main() => runApp(Quizzler());
 
@@ -54,8 +56,10 @@ class _QuizPageState extends State<QuizPage> {
         context: context,
         style: alertStyle,
         type: AlertType.info,
-        title: "YOU GOT IT",
-        desc: "You have finished the quiz",
+        // TODO: add score here
+        title: "YOU SCORE ${score.getPercentage()}!",
+        desc:
+            "Your right answer ${score.getScore()}/${quizBrain.getQuestionLength()}",
         buttons: [
           DialogButton(
             child: Text(
@@ -71,6 +75,7 @@ class _QuizPageState extends State<QuizPage> {
 
       // reset
       setState(() {
+        score.resetScore();
         quizBrain.reset();
         scoreKeeper = [];
       });
@@ -78,6 +83,7 @@ class _QuizPageState extends State<QuizPage> {
       setState(() {
         // update UI
         if (answer == quizBrain.getQuestionAnswer()) {
+          score.addScore();
           scoreKeeper.add(
             Icon(
               Icons.check_circle_outline,
@@ -105,7 +111,7 @@ class _QuizPageState extends State<QuizPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
-          flex: 5,
+          flex: 4,
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
@@ -119,6 +125,21 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
           ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Center(
+                child: Text(
+                  '${score.getScore()} / ${quizBrain.getQuestionLength()}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 50.0,
+                    color: Colors.white,
+                  ),
+                ),
+              )),
         ),
         Expanded(
           child: Padding(
