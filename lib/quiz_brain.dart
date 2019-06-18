@@ -44,14 +44,19 @@ class QuizBrain {
   }
 
   void nextQuestion() {
-    if (quizRunning()) {
+    if (!isFinished()) {
       _questionNumber++;
       print('questionNumber: $_questionNumber');
       print('questionBank.length: ${_questionBank.length}');
     }
   }
 
-  bool quizRunning() {
-    return _questionNumber < _questionBank.length - 1;
+  bool isFinished() {
+    return _questionNumber >= _questionBank.length - 1;
+  }
+
+  void reset() {
+    _questionNumber = 0;
+    print('questionNumber = $_questionNumber');
   }
 }
