@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'question.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'quiz_brain.dart';
 
 QuizBrain quizBrain = QuizBrain();
@@ -30,38 +30,72 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
-
-  bool checkAnswer(bool answer) {
-    return answer == quizBrain.getQuestionAnswer();
-  }
+  var alertStyle = AlertStyle(
+    animationType: AnimationType.fromTop,
+    isCloseButton: false,
+    isOverlayTapDismiss: false,
+    descStyle: TextStyle(fontWeight: FontWeight.bold),
+    animationDuration: Duration(milliseconds: 400),
+    alertBorder: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(0.0),
+      side: BorderSide(
+        color: Colors.grey,
+      ),
+    ),
+    titleStyle: TextStyle(
+      color: Colors.red,
+    ),
+  );
 
   void handleBtnClick(answer) {
     // check quiz is running
-    if (!quizBrain.quizRunning()) {
-      print('quiz is end');
-      return;
-    }
+    if (quizBrain.isFinished()) {
+      Alert(
+        context: context,
+        style: alertStyle,
+        type: AlertType.info,
+        title: "YOU GOT IT",
+        desc: "You have finished the quiz",
+        buttons: [
+          DialogButton(
+            child: Text(
+              "AGAIN",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () => Navigator.pop(context),
+            color: Color.fromRGBO(0, 179, 134, 1.0),
+            radius: BorderRadius.circular(0.0),
+          ),
+        ],
+      ).show();
 
-    setState(() {
-      // update UI
-      if (checkAnswer(answer)) {
-        scoreKeeper.add(
-          Icon(
-            Icons.check_circle_outline,
-            color: Colors.green,
-          ),
-        );
-      } else {
-        scoreKeeper.add(
-          Icon(
-            Icons.remove_circle_outline,
-            color: Colors.red,
-          ),
-        );
-      }
-      // proceed next question
-      quizBrain.nextQuestion();
-    });
+      // reset
+      setState(() {
+        quizBrain.reset();
+        scoreKeeper = [];
+      });
+    } else {
+      setState(() {
+        // update UI
+        if (answer == quizBrain.getQuestionAnswer()) {
+          scoreKeeper.add(
+            Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+            ),
+          );
+        } else {
+          scoreKeeper.add(
+            Icon(
+              Icons.remove_circle_outline,
+              color: Colors.red,
+            ),
+          );
+        }
+        // proceed next question
+        quizBrain.nextQuestion();
+      });
+    }
   }
 
   @override
@@ -133,9 +167,3 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
